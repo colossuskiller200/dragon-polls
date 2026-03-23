@@ -42,9 +42,19 @@
 <script>
 (async () => {
   try {
-    const res = await fetch('/api/network-url');
-    const data = await res.json();
-    const qrUrl = data.mdns || data.url;
+    const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+    let qrUrl, displayUrl;
+
+    if (isLocal) {
+      const res = await fetch('/api/network-url');
+      const data = await res.json();
+      qrUrl = data.mdns || data.url;
+      displayUrl = data.mdns;
+    } else {
+      qrUrl = location.origin;
+      displayUrl = location.origin;
+    }
+
     new QRCode(document.getElementById('qr-code'), {
       text: qrUrl,
       width: 160,
@@ -53,7 +63,7 @@
       colorLight: '#ffecd0',
       correctLevel: QRCode.CorrectLevel.M
     });
-    document.getElementById('network-url').innerHTML = `<strong>${data.mdns}</strong>`;
+    document.getElementById('network-url').innerHTML = `<strong>${displayUrl}</strong>`;
   } catch (e) {
     document.getElementById('qr-code').parentElement.style.display = 'none';
   }
