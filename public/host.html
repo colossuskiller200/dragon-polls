@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Polls - Host Setup</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <div class="logo-area">
+    <div class="dragon-ball"></div>
+    <h1>Dragon Polls</h1>
+    <p class="subtitle">Host Control Panel</p>
+  </div>
+
+  <div class="card">
+    <h2>The Question</h2>
+    <label for="question">What are the warriors voting on?</label>
+    <textarea id="question" placeholder="e.g. Who is the strongest fighter in the universe?"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>Answer Mode</h2>
+    <div class="mode-selector">
+      <button class="mode-btn active" data-mode="options" onclick="setMode('options')">Fixed Options</button>
+      <button class="mode-btn" data-mode="freetext" onclick="setMode('freetext')">Free Text</button>
+      <button class="mode-btn" data-mode="slider" onclick="setMode('slider')">Slider</button>
+    </div>
+
+    <!-- Fixed Options settings -->
+    <div id="options-settings">
+      <div class="toggle-row" style="margin-top:12px;">
+        <label class="toggle">
+          <input type="checkbox" id="ranked-toggle">
+          <span class="toggle-slider"></span>
+        </label>
+        <span>Ranked choice (voters pick 1st &amp; 2nd)</span>
+      </div>
+
+      <div id="ranked-weight-section" class="hidden" style="margin-top:8px;margin-bottom:12px;">
+        <label>2nd choice weight</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+          <input type="number" id="second-weight" value="0.5" step="0.1" min="0" max="1" style="width:80px;padding:8px;border-radius:8px;border:1px solid rgba(255,180,80,0.2);background:rgba(255,255,255,0.06);color:#ffd080;font-size:1rem;">
+          <span style="color:#9a7a50;font-size:0.85rem;">votes per 2nd choice</span>
+        </div>
+      </div>
+
+      <label style="margin-top:12px;">Options</label>
+      <div id="options-container">
+        <div class="option-input-row">
+          <input type="text" placeholder="Option 1" class="option-input">
+          <button class="remove-option" onclick="removeOption(this)">&times;</button>
+        </div>
+        <div class="option-input-row">
+          <input type="text" placeholder="Option 2" class="option-input">
+          <button class="remove-option" onclick="removeOption(this)">&times;</button>
+        </div>
+      </div>
+      <button class="add-option-btn" onclick="addOption()">+ Add option</button>
+    </div>
+
+    <!-- Slider settings -->
+    <div id="slider-settings" class="hidden" style="margin-top:16px;">
+      <label>Range</label>
+      <div class="dual-range-wrap" style="margin-top:12px;">
+        <div class="dual-range-labels">
+          <span id="range-min-label" class="dual-range-val">0</span>
+          <span id="range-max-label" class="dual-range-val">5</span>
+        </div>
+        <div class="dual-range">
+          <input type="range" id="slider-min" min="0" max="10" value="0" class="dual-range-input">
+          <input type="range" id="slider-max" min="0" max="10" value="5" class="dual-range-input">
+          <div class="dual-range-track"></div>
+          <div class="dual-range-fill" id="range-fill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary btn-full" onclick="createPoll()">Launch the Dragon Polls!</button>
+  <p id="setup-error" style="color:#cc3300;text-align:center;margin-top:12px;font-weight:600;" class="hidden"></p>
+</div>
+
+<script>
+let currentMode = 'options';
+const rankedToggle = document.getElementById('ranked-toggle');
+
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('options-settings').classList.toggle('hidden', mode !== 'options');
+  document.getElementById('slider-settings').classList.toggle('hidden', mode !== 'slider');
+}
+
+rankedToggle.addEventListener('change', () => {
+  document.getElementById('ranked-weight-section').classList.toggle('hidden', !rankedToggle.checked);
+});
+
+// Dual range slider
+const sliderMinEl = document.getElementById('slider-min');
+const sliderMaxEl = document.getElementById('slider-max');
+const rangeFill = document.getElementById('range-fill');
+
+function updateRange() {
+  let lo = parseInt(sliderMinEl.value);
+  let hi = parseInt(sliderMaxEl.value);
+  if (lo >= hi) { if (this === sliderMinEl) sliderMinEl.value = hi - 1; else sliderMaxEl.value = lo + 1; }
+  lo = parseInt(sliderMinEl.value);
+  hi = parseInt(sliderMaxEl.value);
+  document.getElementById('range-min-label').textContent = lo;
+  document.getElementById('range-max-label').textContent = hi;
+  const pctLo = (lo / 10) * 100;
+  const pctHi = (hi / 10) * 100;
+  rangeFill.style.left = pctLo + '%';
+  rangeFill.style.width = (pctHi - pctLo) + '%';
+}
+
+sliderMinEl.addEventListener('input', updateRange);
+sliderMaxEl.addEventListener('input', updateRange);
+updateRange();
+
+function addOption() {
+  const container = document.getElementById('options-container');
+  const count = container.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'option-input-row';
+  row.innerHTML = `<input type="text" placeholder="Option ${count}" class="option-input"><button class="remove-option" onclick="removeOption(this)">&times;</button>`;
+  container.appendChild(row);
+}
+
+function removeOption(btn) {
+  const container = document.getElementById('options-container');
+  if (container.children.length > 1) btn.parentElement.remove();
+}
+
+function showError(msg) {
+  const el = document.getElementById('setup-error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 3000);
+}
+
+async function createPoll() {
+  const question = document.getElementById('question').value.trim();
+  if (!question) return showError('Enter a question!');
+
+  const payload = { question };
+
+  if (currentMode === 'freetext') {
+    payload.freeText = true;
+  } else if (currentMode === 'slider') {
+    payload.slider = true;
+    payload.sliderMin = parseInt(document.getElementById('slider-min').value) || 0;
+    payload.sliderMax = parseInt(document.getElementById('slider-max').value) || 5;
+    payload.sliderStep = 1;
+    if (payload.sliderMin >= payload.sliderMax) return showError('Max must be greater than Min!');
+  } else {
+    const options = [...document.querySelectorAll('.option-input')].map(i => i.value.trim()).filter(v => v);
+    if (options.length < 2) return showError('Add at least 2 options!');
+    payload.options = options;
+    payload.rankedChoice = rankedToggle.checked;
+    if (rankedToggle.checked) {
+      payload.secondWeight = parseFloat(document.getElementById('second-weight').value) || 0.5;
+    }
+  }
+
+  const res = await fetch('/api/poll', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) return showError('Failed to create poll');
+  window.location.href = '/';
+}
+</script>
+</body>
+</html>

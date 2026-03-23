@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Polls</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo-area">
+    <div class="dragon-ball"></div>
+    <h1>Dragon Polls</h1>
+    <p class="subtitle">Summon the Dragon &mdash; Cast Your Vote</p>
+  </div>
+
+  <div class="landing-options">
+    <a class="landing-btn" href="vote.html?room=1">
+      <h3>Room 1</h3>
+      <p>Join as a voter in Room 1</p>
+    </a>
+    <a class="landing-btn" href="vote.html?room=2">
+      <h3>Room 2</h3>
+      <p>Join as a voter in Room 2</p>
+    </a>
+    <a class="landing-btn host-btn" href="host.html">
+      <h3>Host</h3>
+      <p>Set up a new poll</p>
+    </a>
+  </div>
+
+  <div class="card" style="text-align:center;margin-top:20px;">
+    <h2 style="font-size:1.2rem;margin-bottom:4px;">Join from Another Device</h2>
+    <p style="color:#9a7a50;font-size:0.85rem;margin-bottom:16px;">Scan to open Dragon Polls on a phone or tablet</p>
+    <div id="qr-code" style="display:inline-block;padding:14px;background:rgba(255,200,100,0.1);border:1px solid rgba(255,180,80,0.2);border-radius:12px;box-shadow:0 0 20px rgba(255,140,0,0.1);"></div>
+    <p id="network-url" style="color:#a08060;font-size:0.8rem;margin-top:12px;font-family:monospace;"></p>
+  </div>
+</div>
+
+<script>
+(async () => {
+  try {
+    const res = await fetch('/api/network-url');
+    const data = await res.json();
+    const qrUrl = data.mdns || data.url;
+    new QRCode(document.getElementById('qr-code'), {
+      text: qrUrl,
+      width: 160,
+      height: 160,
+      colorDark: '#3a2008',
+      colorLight: '#ffecd0',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    document.getElementById('network-url').innerHTML = `<strong>${data.mdns}</strong>`;
+  } catch (e) {
+    document.getElementById('qr-code').parentElement.style.display = 'none';
+  }
+})();
+</script>
+
+</body>
+</html>

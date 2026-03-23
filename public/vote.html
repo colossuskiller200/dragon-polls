@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Polls - Vote</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══ WAITING SCREEN ═══ -->
+<div id="waiting-screen" class="screen active">
+  <div class="container" style="text-align:center;padding-top:60px;">
+    <div class="logo-area">
+      <div class="dragon-ball waiting-ball"></div>
+      <h1>Dragon Polls</h1>
+      <p class="subtitle" id="waiting-room-label">Room ?</p>
+    </div>
+    <p style="color:#9a7a50;margin-top:30px;font-weight:600;">Waiting for the host to start a poll...</p>
+    <div style="margin-top:24px;">
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:30%;animation:pulse 1.5s infinite alternate"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VOTING SCREEN ═══ -->
+<div id="voting-screen" class="screen">
+  <div class="container">
+    <div class="logo-area">
+      <div class="dragon-ball" style="width:48px;height:48px;"></div>
+      <h1 style="font-size:2.2rem;">Dragon Polls</h1>
+      <p class="subtitle" id="voting-room-label">Room ?</p>
+    </div>
+
+    <div class="question-display" id="question-text"></div>
+
+    <div class="other-room-card" id="other-room-status">
+      <span id="other-room-info">...</span>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="vote-progress-fill" style="width:0%"></div>
+    </div>
+    <p class="progress-text" id="vote-progress-text"></p>
+
+    <div class="voter-name" id="voter-name"></div>
+
+    <div id="ranked-hint" class="hidden" style="text-align:center;color:#9a7a50;font-size:0.85rem;margin-bottom:8px;font-weight:600;">
+      <span id="ranked-hint-text">Pick your 1st choice</span>
+    </div>
+
+    <div id="options-mode" class="hidden">
+      <div class="options-list" id="options-list"></div>
+    </div>
+
+    <div id="freetext-mode" class="hidden">
+      <input type="text" class="free-text-input" id="free-text-answer" placeholder="Type your answer...">
+    </div>
+
+    <div id="slider-mode" class="hidden">
+      <div class="slider-container">
+        <div class="slider-value" id="slider-value">—</div>
+        <input type="range" class="vote-slider" id="vote-slider">
+        <div class="slider-labels">
+          <span id="slider-min-label">0</span>
+          <span id="slider-max-label">5</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="submit-section" class="hidden">
+      <button class="btn btn-primary btn-full" id="submit-btn" onclick="submitVote()" disabled>Submit Vote</button>
+      <div style="height:10px"></div>
+    </div>
+    <button class="btn btn-skip btn-full" onclick="skipVote()">Skip</button>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM OVERLAY ═══ -->
+<div id="confirm-overlay" class="confirm-overlay hidden">
+  <div class="confirm-box">
+    <p id="confirm-text"></p>
+    <div class="confirm-buttons">
+      <button class="btn btn-secondary" onclick="cancelConfirm()">Back</button>
+      <button class="btn btn-primary" onclick="doConfirm()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COMPLETE SCREEN ═══ -->
+<div id="complete-screen" class="screen">
+  <div class="container complete-screen">
+    <div class="logo-area">
+      <div class="dragon-ball" style="width:80px;height:80px;"></div>
+    </div>
+    <h2>All Votes Cast!</h2>
+    <p>Your room's warriors have spoken.</p>
+    <div style="height:28px"></div>
+    <button class="btn btn-primary btn-full" onclick="showRoomResults()">View Room Results</button>
+    <div style="height:10px"></div>
+    <button class="btn btn-secondary btn-full" onclick="showHostResults()">View Combined Tally</button>
+    <div style="height:24px"></div>
+    <button class="btn btn-secondary btn-full" onclick="startNewPoll()" style="opacity:0.7;font-size:0.9rem;">New Poll</button>
+  </div>
+</div>
+
+<!-- ═══ ROOM RESULTS SCREEN ═══ -->
+<div id="room-results-screen" class="screen">
+  <div class="container">
+    <div class="logo-area">
+      <div class="dragon-ball" style="width:48px;height:48px;"></div>
+      <h1 style="font-size:2.2rem;">Dragon Polls</h1>
+      <p class="subtitle" id="results-room-label">Room ? Results</p>
+    </div>
+
+    <div class="results-tabs">
+      <button class="results-tab active" onclick="showRoomResults()">Room Results</button>
+      <button class="results-tab" onclick="showHostResults()">Combined Tally</button>
+    </div>
+
+    <div class="question-display" id="room-results-question"></div>
+
+    <div class="card">
+      <h2>How Everyone Voted</h2>
+      <div id="room-results-list"></div>
+      <button class="btn-export" id="export-btn" onclick="exportRoomResults()">Copy to Clipboard</button>
+    </div>
+
+    <button class="btn btn-secondary btn-full" onclick="backToComplete()">Back</button>
+    <div style="height:10px"></div>
+    <button class="btn btn-secondary btn-full" onclick="startNewPoll()" style="opacity:0.7;font-size:0.9rem;">New Poll</button>
+  </div>
+</div>
+
+<!-- ═══ HOST RESULTS SCREEN ═══ -->
+<div id="host-results-screen" class="screen">
+  <div class="container">
+    <div class="logo-area">
+      <div class="dragon-ball" style="width:48px;height:48px;"></div>
+      <h1 style="font-size:2.2rem;">Dragon Polls</h1>
+    </div>
+
+    <div class="results-tabs">
+      <button class="results-tab" onclick="showRoomResults()">Room Results</button>
+      <button class="results-tab active" onclick="showHostResults()">Combined Tally</button>
+    </div>
+
+    <div class="card">
+      <div class="question-display" id="host-results-question"></div>
+
+      <div class="room-status">
+        <div class="room-badge">Room 1<br><strong id="hr-room1-progress">0/0</strong></div>
+        <div class="room-badge">Room 2<br><strong id="hr-room2-progress">0/0</strong></div>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="hr-total-progress-fill" style="width:0%"></div>
+      </div>
+      <p class="progress-text" id="hr-total-progress-text">0 / 0 votes cast</p>
+    </div>
+
+    <div class="card">
+      <h2>Overall Tally</h2>
+      <div id="hr-tally-container"></div>
+    </div>
+
+    <div class="results-columns">
+      <div class="card">
+        <h2>Room 1</h2>
+        <div id="hr-room1-tally"></div>
+      </div>
+      <div class="card">
+        <h2>Room 2</h2>
+        <div id="hr-room2-tally"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Raw Data</h2>
+      <p style="color:#9a7a50;font-size:0.85rem;margin-bottom:12px;">Every individual vote, de-identified</p>
+      <div id="hr-raw-data"></div>
+    </div>
+
+    <button class="btn btn-secondary btn-full" onclick="backToComplete()">Back</button>
+    <div style="height:10px"></div>
+    <button class="btn btn-secondary btn-full" onclick="startNewPoll()" style="opacity:0.7;font-size:0.9rem;">New Poll</button>
+  </div>
+</div>
+
+<script>
+// ─── Get room from URL ───────────────────────────────────────────────────────
+const params = new URLSearchParams(window.location.search);
+const room = parseInt(params.get('room'));
+
+if (![1, 2].includes(room)) {
+  document.getElementById('waiting-screen').innerHTML = `
+    <div class="container" style="text-align:center;padding-top:60px;">
+      <div class="logo-area"><div class="dragon-ball"></div><h1>Dragon Polls</h1></div>
+      <p style="color:#cc3300;margin-top:30px;font-weight:600;">Invalid room! <a href="/" style="color:#ff8800;">Go back</a></p>
+    </div>`;
+}
+
+document.getElementById('waiting-room-label').textContent = `Room ${room}`;
+document.getElementById('voting-room-label').textContent = `Room ${room}`;
+document.getElementById('results-room-label').textContent = `Room ${room} Results`;
+
+// ─── Sound & Haptics ─────────────────────────────────────────────────────────
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(freq, dur, type = 'sine') {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+
+function soundVote() {
+  playSound(523, 0.1); // C5
+  setTimeout(() => playSound(659, 0.1), 60); // E5
+  setTimeout(() => playSound(784, 0.15), 120); // G5
+}
+
+function soundSkip() {
+  playSound(330, 0.15, 'triangle'); // E4 soft
+}
+
+function soundComplete() {
+  [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playSound(f, 0.2), i * 100));
+}
+
+function haptic(ms = 20) {
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let voters = [];
+let currentIndex = 0;
+let pollData = null;
+let selectedAnswer = null;
+let rankedFirst = null;
+let rankedSecond = null;
+let confirmAction = null;
+let otherRoomInterval = null;
+let hostPollInterval = null;
+
+// ─── Wait for poll ───────────────────────────────────────────────────────────
+const waitInterval = setInterval(async () => {
+  try {
+    const res = await fetch('/api/poll');
+    const data = await res.json();
+    if (data.active) {
+      clearInterval(waitInterval);
+      pollData = data;
+      await loadVoters();
+    }
+  } catch (e) { /* retry */ }
+}, 2000);
+
+async function loadVoters() {
+  const res = await fetch(`/api/poll/voters/${room}`);
+  const data = await res.json();
+  voters = data.voters;
+  currentIndex = 0;
+
+  document.getElementById('question-text').textContent = pollData.question;
+
+  if (pollData.slider) {
+    document.getElementById('slider-mode').classList.remove('hidden');
+    const slider = document.getElementById('vote-slider');
+    slider.min = pollData.sliderMin;
+    slider.max = pollData.sliderMax;
+    slider.step = pollData.sliderStep;
+    slider.value = pollData.sliderMin;
+    document.getElementById('slider-min-label').textContent = pollData.sliderMin;
+    document.getElementById('slider-max-label').textContent = pollData.sliderMax;
+    document.getElementById('slider-value').textContent = '—';
+    let sliderTouched = false;
+    slider.addEventListener('input', () => {
+      sliderTouched = true;
+      document.getElementById('slider-value').textContent = slider.value;
+    });
+    slider.addEventListener('change', async () => {
+      if (!sliderTouched) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      soundVote();
+      haptic(30);
+      const name = voters[currentIndex];
+      await sendVote(name, parseFloat(slider.value));
+      currentIndex++;
+      showCurrentVoter();
+    });
+  } else if (pollData.freeText) {
+    document.getElementById('freetext-mode').classList.remove('hidden');
+    document.getElementById('submit-section').classList.remove('hidden');
+    const freeInput = document.getElementById('free-text-answer');
+    freeInput.addEventListener('input', (e) => {
+      selectedAnswer = e.target.value.trim() || null;
+      document.getElementById('submit-btn').disabled = !selectedAnswer;
+    });
+    freeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && selectedAnswer) submitVote();
+    });
+  } else {
+    document.getElementById('options-mode').classList.remove('hidden');
+    if (pollData.rankedChoice) document.getElementById('ranked-hint').classList.remove('hidden');
+    renderOptions();
+  }
+
+  switchScreen('voting-screen');
+  showCurrentVoter();
+  startOtherRoomPolling();
+}
+
+function renderOptions() {
+  const list = document.getElementById('options-list');
+  list.innerHTML = pollData.options.map((opt, i) => `
+    <button class="option-btn" data-value="${escapeAttr(opt)}" data-index="${i}" onclick="selectOption(this, '${escapeAttr(opt)}')">${escapeHtml(opt)}</button>
+  `).join('');
+}
+
+async function selectOption(btn, value) {
+  haptic();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  if (pollData.rankedChoice) {
+    // Ranked choice: pick 1st, then 2nd, then auto-submit
+    if (!rankedFirst) {
+      rankedFirst = value;
+      document.querySelectorAll('.option-btn').forEach(b => {
+        b.classList.remove('ranked-first', 'ranked-second');
+      });
+      btn.classList.add('ranked-first');
+      btn.innerHTML = `<span class="rank-badge rank-1">1st</span> ${escapeHtml(value)}`;
+      document.getElementById('ranked-hint-text').textContent = 'Now pick your 2nd choice, or skip';
+      playSound(523, 0.1);
+    } else if (value === rankedFirst) {
+      // Tapping 1st choice again deselects it
+      rankedFirst = null;
+      btn.classList.remove('ranked-first');
+      btn.innerHTML = escapeHtml(value);
+      document.getElementById('ranked-hint-text').textContent = 'Pick your 1st choice';
+    } else {
+      rankedSecond = value;
+      btn.classList.add('ranked-second');
+      btn.innerHTML = `<span class="rank-badge rank-2">2nd</span> ${escapeHtml(value)}`;
+      soundVote();
+      haptic(30);
+      // Auto-submit ranked vote
+      const name = voters[currentIndex];
+      await sendVote(name, { first: rankedFirst, second: rankedSecond });
+      currentIndex++;
+      showCurrentVoter();
+    }
+  } else {
+    // Single choice: instant submit — no lingering highlight
+    selectedAnswer = value;
+    soundVote();
+    haptic(30);
+    const name = voters[currentIndex];
+    await sendVote(name, value);
+    currentIndex++;
+    showCurrentVoter();
+  }
+}
+
+function fireKiBlast() {
+  const blast = document.createElement('div');
+  blast.className = 'ki-blast';
+  document.body.appendChild(blast);
+  blast.addEventListener('animationend', () => blast.remove());
+}
+
+function showCurrentVoter() {
+  if (currentIndex >= voters.length) {
+    clearInterval(otherRoomInterval);
+    fetch(`/api/poll/current/${room}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentVoter: null, done: true })
+    });
+    fireKiBlast();
+    soundComplete();
+    haptic(50);
+    switchScreen('complete-screen');
+    return;
+  }
+
+  // Ki blast on voter transitions (not the first voter)
+  if (currentIndex > 0) fireKiBlast();
+
+  const nameEl = document.getElementById('voter-name');
+  const name = voters[currentIndex];
+  selectedAnswer = null;
+  rankedFirst = null;
+  rankedSecond = null;
+  document.getElementById('submit-btn').disabled = true;
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.classList.remove('selected', 'ranked-first', 'ranked-second');
+    // Reset innerHTML to plain text (remove rank badges)
+    const val = b.getAttribute('data-value');
+    if (val) b.innerHTML = escapeHtml(val);
+  });
+  if (pollData.rankedChoice) {
+    document.getElementById('ranked-hint-text').textContent = 'Pick your 1st choice';
+  }
+  if (pollData.freeText) document.getElementById('free-text-answer').value = '';
+  if (pollData.slider) {
+    const slider = document.getElementById('vote-slider');
+    slider.value = pollData.sliderMin;
+    document.getElementById('slider-value').textContent = '—';
+  }
+
+  // Slide animation (#1) + smooth scroll (#5)
+  if (currentIndex > 0) {
+    nameEl.classList.add('slide-out');
+    setTimeout(() => {
+      nameEl.textContent = name;
+      nameEl.classList.remove('slide-out');
+      nameEl.classList.add('slide-in');
+      requestAnimationFrame(() => {
+        nameEl.classList.add('slide-in-active');
+        nameEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          nameEl.classList.remove('slide-in', 'slide-in-active');
+        }, 300);
+      });
+    }, 200);
+  } else {
+    nameEl.textContent = name;
+    nameEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  const pct = (currentIndex / voters.length) * 100;
+  document.getElementById('vote-progress-fill').style.width = pct + '%';
+  document.getElementById('vote-progress-text').textContent = `${currentIndex} / ${voters.length}`;
+
+  fetch(`/api/poll/current/${room}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ currentVoter: name, done: false })
+  });
+}
+
+async function submitVote() {
+  if (!selectedAnswer) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  soundVote();
+  haptic(30);
+  const name = voters[currentIndex];
+  await sendVote(name, selectedAnswer);
+  currentIndex++;
+  showCurrentVoter();
+}
+
+async function skipVote() {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  soundSkip();
+  haptic(10);
+  const name = voters[currentIndex];
+  // In ranked mode, skip sends null too
+  await sendVote(name, null);
+  currentIndex++;
+  showCurrentVoter();
+}
+
+async function sendVote(name, answer) {
+  await fetch('/api/poll/vote', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ room, name, answer })
+  });
+}
+
+// ─── Other room status ──────────────────────────────────────────────────────
+function startOtherRoomPolling() {
+  pollOtherRoom();
+  otherRoomInterval = setInterval(pollOtherRoom, 3000);
+}
+
+async function pollOtherRoom() {
+  const otherRoom = room === 1 ? 2 : 1;
+  try {
+    const res = await fetch(`/api/poll/current/${otherRoom}`);
+    const data = await res.json();
+    const el = document.getElementById('other-room-info');
+    if (data.done) {
+      el.innerHTML = `Room ${otherRoom} has finished voting!`;
+    } else if (data.currentVoter) {
+      el.innerHTML = `Voting with: <strong>${escapeHtml(data.currentVoter)}</strong>`;
+    } else {
+      el.innerHTML = `Room ${otherRoom} &mdash; waiting to start...`;
+    }
+  } catch (e) { /* ignore */ }
+}
+
+// ─── Confirmation dialog ─────────────────────────────────────────────────────
+function showConfirm(text, action) {
+  document.getElementById('confirm-text').innerHTML = text;
+  document.getElementById('confirm-overlay').classList.remove('hidden');
+  confirmAction = action;
+}
+
+function cancelConfirm() {
+  document.getElementById('confirm-overlay').classList.add('hidden');
+  confirmAction = null;
+}
+
+function doConfirm() {
+  document.getElementById('confirm-overlay').classList.add('hidden');
+  if (confirmAction) confirmAction();
+  confirmAction = null;
+}
+
+// ─── Room results ────────────────────────────────────────────────────────────
+async function showRoomResults() {
+  const res = await fetch(`/api/poll/results/${room}`);
+  const data = await res.json();
+
+  document.getElementById('room-results-question').textContent = data.question;
+  document.getElementById('room-results-list').innerHTML = data.results.map(r => `
+    <div class="voter-result-row">
+      <span class="voter-result-name">${escapeHtml(r.name)}</span>
+      <span class="voter-result-answer">${escapeHtml(r.answer)}</span>
+    </div>
+  `).join('');
+
+  if (hostPollInterval) clearInterval(hostPollInterval);
+  switchScreen('room-results-screen');
+}
+
+function exportRoomResults() {
+  const rows = document.querySelectorAll('#room-results-list .voter-result-row');
+  const question = document.getElementById('room-results-question').textContent;
+  let text = `${question}\nRoom ${room} Results\n${'─'.repeat(30)}\n`;
+  rows.forEach(row => {
+    const name = row.querySelector('.voter-result-name').textContent;
+    const answer = row.querySelector('.voter-result-answer').textContent;
+    text += `${name}: ${answer}\n`;
+  });
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('export-btn');
+    btn.classList.add('copied');
+    btn.textContent = 'Copied!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = 'Copy to Clipboard';
+    }, 2000);
+  });
+}
+
+// ─── Host combined results (no names) ────────────────────────────────────────
+async function showHostResults() {
+  switchScreen('host-results-screen');
+  pollHostResults();
+  hostPollInterval = setInterval(pollHostResults, 2000);
+}
+
+async function pollHostResults() {
+  try {
+    const res = await fetch('/api/poll/results');
+    if (!res.ok) return;
+    const data = await res.json();
+
+    document.getElementById('host-results-question').textContent = data.question;
+    document.getElementById('hr-room1-progress').textContent = `${data.rooms[1].voted} / ${data.rooms[1].total}`;
+    document.getElementById('hr-room2-progress').textContent = `${data.rooms[2].voted} / ${data.rooms[2].total}`;
+
+    const pct = data.totalVoters > 0 ? (data.totalVoted / data.totalVoters * 100) : 0;
+    document.getElementById('hr-total-progress-fill').style.width = pct + '%';
+    document.getElementById('hr-total-progress-text').textContent = `${data.totalVoted} / ${data.totalVoters} votes cast`;
+
+    const container = document.getElementById('hr-tally-container');
+    const entries = Object.entries(data.tally).sort((a, b) => b[1] - a[1]);
+    const maxVotes = entries.length > 0 ? entries[0][1] : 1;
+
+    container.innerHTML = entries.map(([answer, count]) => `
+      <div class="result-bar-container">
+        <div class="result-label">
+          <span>${escapeHtml(answer)}</span>
+          <span>${count} vote${count !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="result-bar">
+          <div class="result-bar-fill" style="width:${(count / maxVotes) * 100}%"></div>
+        </div>
+      </div>
+    `).join('');
+
+    if (entries.length === 0 && !data.sliderStats) {
+      container.innerHTML = '<p style="color:#b0a090;text-align:center;">No votes yet...</p>';
+    }
+
+    // Slider stats
+    if (data.slider && data.sliderStats) {
+      container.innerHTML = `
+        <div style="text-align:center;padding:16px 0;">
+          <div style="font-size:3rem;font-weight:900;color:#ffd080;font-family:'Bangers',cursive;letter-spacing:2px;">${data.sliderStats.average}</div>
+          <div style="color:#9a7a50;font-size:0.9rem;margin-top:4px;">Average (${data.sliderStats.count} votes)</div>
+          <div style="color:#a08060;font-size:0.85rem;margin-top:8px;">Range: ${data.sliderStats.min} — ${data.sliderStats.max}</div>
+        </div>
+      ` + container.innerHTML;
+    }
+
+    // Per-room tallies
+    renderRoomTally('hr-room1-tally', data.rooms[1]);
+    renderRoomTally('hr-room2-tally', data.rooms[2]);
+
+    // Raw data (de-identified list)
+    const rawContainer = document.getElementById('hr-raw-data');
+    if (data.rawVotes && data.rawVotes.length > 0) {
+      rawContainer.innerHTML = data.rawVotes.map((v, i) => `
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,180,80,0.1);font-size:0.9rem;">
+          <span style="color:#a08060;">${i + 1}.</span>
+          <span style="font-weight:700;color:#ffd080;">${escapeHtml(v)}</span>
+        </div>
+      `).join('');
+    } else {
+      rawContainer.innerHTML = '<p style="color:#b0a090;text-align:center;font-size:0.85rem;">No votes yet...</p>';
+    }
+  } catch (e) { /* ignore */ }
+}
+
+function renderRoomTally(containerId, roomData) {
+  const container = document.getElementById(containerId);
+  const entries = Object.entries(roomData.tally || {}).sort((a, b) => b[1] - a[1]);
+  const max = entries.length > 0 ? entries[0][1] : 1;
+
+  container.innerHTML = entries.map(([answer, count]) => `
+    <div class="result-bar-container">
+      <div class="result-label">
+        <span>${escapeHtml(answer)}</span>
+        <span>${count}</span>
+      </div>
+      <div class="result-bar">
+        <div class="result-bar-fill" style="width:${(count / max) * 100}%"></div>
+      </div>
+    </div>
+  `).join('');
+
+  if (entries.length === 0) {
+    container.innerHTML = '<p style="color:#b0a090;text-align:center;font-size:0.85rem;">No votes yet...</p>';
+  }
+}
+
+function backToComplete() {
+  clearInterval(hostPollInterval);
+  switchScreen('complete-screen');
+}
+
+async function startNewPoll() {
+  await fetch('/api/poll/reset', { method: 'POST' });
+  window.location.href = '/';
+}
+
+// Auto-detect poll reset and return to waiting screen
+setInterval(async () => {
+  const screen = document.querySelector('.screen.active')?.id;
+  if (!screen || screen === 'waiting-screen' || screen === 'voting-screen') return;
+  try {
+    const res = await fetch('/api/poll');
+    const data = await res.json();
+    if (!data.active) {
+      clearInterval(hostPollInterval);
+      clearInterval(otherRoomInterval);
+      switchScreen('waiting-screen');
+      // Restart the wait-for-poll loop
+      window.location.reload();
+    }
+  } catch (e) { /* ignore */ }
+}, 3000);
+
+// ─── Screen switching ────────────────────────────────────────────────────────
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function escapeAttr(str) {
+  return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
