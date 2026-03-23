@@ -15,7 +15,7 @@ const ROOM_1_VOTERS = [
   'Machine Gun Kelly', 'Anya Taylor Joy', 'Clairo', 'Troye Sivan',
   'Renee', 'Rhian', 'Ayo', 'Ruby', 'Emma Corrin', 'Lisa', 'Sebastian',
   'Garance', 'Gracie', 'Steven', 'St Vincent', 'Aaron Pierre',
-  'Pedro Pascal', 'Sadie'
+  'Pedro Pascal', 'Sadie', 'Paul Mescal'
 ];
 
 const ROOM_2_VOTERS = [
