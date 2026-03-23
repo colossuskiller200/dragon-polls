@@ -11,24 +11,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 const ROOM_1_VOTERS = [
   'Grimes', 'Justin West', 'James West', 'Halsey', 'Hailee Steinfeld',
   'Post Malone', 'Jodie Comer', 'Camila Cabello', 'Sofia Cabello',
-  'Sydney Sweeney', 'Dua Lipa', 'Shawn Mendes', 'Dominic Fike',
-  'Zendaya', 'Charli xcx', 'Machine Gun Kelly', 'Anya Taylor Joy',
-  'Clairo', 'Penelope', 'Troye Sivan', 'Renee', 'Rhian', 'Ayo',
-  'Stevie', 'Ruby', 'Emma Corrin', 'Lisa', 'Sebastian', 'Garance',
-  'Gracie', 'Steven', 'St Vincent', 'Nicholas', 'Aaron Pierre',
-  'Pedro Pascal'
+  'Sydney Sweeney', 'Shawn Mendes', 'Dominic Fike', 'Charli xcx',
+  'Machine Gun Kelly', 'Anya Taylor Joy', 'Clairo', 'Troye Sivan',
+  'Renee', 'Rhian', 'Ayo', 'Ruby', 'Emma Corrin', 'Lisa', 'Sebastian',
+  'Garance', 'Gracie', 'Steven', 'St Vincent', 'Aaron Pierre',
+  'Pedro Pascal', 'Sadie'
 ];
 
 const ROOM_2_VOTERS = [
-  'Billie Eilish', 'Hunter Schafer', 'Alexa Campbell', 'Luke West',
+  'Billie Eilish', 'Hunter Schafer', 'Alexa Campbell',
   'Timothee Chalamet', 'Lil Nas X', 'Olivia Rodrigo', 'Harry Styles',
   'Claudia Sulewski', 'Finneas O\'Connell', 'Michael B Jordan',
-  'Tyler The Creator', 'SZA', 'Kid Cudi', 'Tony Stark', 'Phoebe',
-  'Simu Liu', 'Taylor Russell', 'Jenna Ortega', 'Rachel Sennott',
-  'Sabrina Carpenter', 'Dafne Keen', 'Barry Keoghan', 'Este Haim',
+  'Kid Cudi', 'Tony Stark', 'Simu Liu', 'Jenna Ortega',
+  'Rachel Sennott', 'Sabrina Carpenter', 'Dafne Keen', 'Barry Keoghan',
   'Omar Apollo', 'Chapelle Roan', 'Madelyn Cline', 'Doja Cat',
   'Mila King', 'Jasmine-Rivera King', 'Bella Hadid', 'Odessa A\'zion',
-  'Glen Powell', 'Colman Domingo', 'Adriana Young'
+  'Glen Powell', 'Colman Domingo', 'Adriana Young', 'Florence Pugh',
+  'Mikey Madison', 'Alex Consani', 'Tate McRae'
 ];
 
 // ─── State ───────────────────────────────────────────────────────────────────
